@@ -1,0 +1,55 @@
+import os
+
+def pad(text):
+    # Add PKCS#7 padding to the plaintext
+    padding_length = 8 - (len(text) % 8)
+    padding = bytes([padding_length] * padding_length)
+    return text + padding
+
+def unpad(text):
+    # Remove PKCS#7 padding from the plaintext
+    padding_length = text[-1]
+    return text[:-padding_length]
+
+def encrypt_cbc(plaintext, key):
+    # Generate a random initialization vector
+    iv = os.urandom(8)
+
+    # Create the 3DES cipher object and initialize with the key and IV
+    cipher = DES3.new(key, DES3.MODE_CBC, iv)
+
+    # Pad the plaintext and encrypt it in CBC mode using 3DES
+    padded_plaintext = pad(plaintext)
+    ciphertext = cipher.encrypt(padded_plaintext)
+
+    # Prepend the IV to the ciphertext
+    return iv + ciphertext
+
+def decrypt_cbc(ciphertext, key):
+    # Extract the IV from the ciphertext
+    iv = ciphertext[:8]
+
+    # Create the 3DES cipher object and initialize with the key and IV
+    cipher = DES3.new(key, DES3.MODE_CBC, iv)
+
+    # Decrypt the ciphertext in CBC mode using 3DES and remove the padding
+    padded_plaintext = cipher.decrypt(ciphertext[8:])
+    plaintext = unpad(padded_plaintext)
+
+    return plaintext
+
+# Define the plaintext message
+plaintext = b"meet me at the usual place at ten rather than eight oclock"
+
+# Define the initial key
+key = b"\x01\x23\x45\x67\x89\xAB\xCD\xEF\xFE\xDC\xBA\x98\x76\x54\x32\x10\x01\x23\x45\x67\x89\xAB\xCD\xEF"
+
+# Encrypt the plaintext message using CBC mode with 3DES
+ciphertext = encrypt_cbc(plaintext, key)
+
+# Decrypt the ciphertext message using CBC mode with 3DES
+decrypted_plaintext = decrypt_cbc(ciphertext, key)
+
+print(f"Plaintext: {plaintext}")
+print(f"Ciphertext: {ciphertext}")
+print(f"Decrypted plaintext: {decrypted_plaintext}")
